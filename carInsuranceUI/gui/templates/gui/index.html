@@ -11,11 +11,12 @@
     <div class="container-fluid">
       <div class="row-fluid">
         <div class="fileinput fileinput-new" data-provides="fileinput">
-          <span class="btn btn-default btn-file"><span>Choose file</span><input type="file"    multiple /> 
+          <span class="btn btn-default btn-file"><span>Choose files</span>
+          <input type="file"    multiple id="file-input"/> 
           </span>
-          <span class="fileinput-filename"></span><span class="fileinput-new">No file chosen </span>
+          <span class="fileinput-filename"></span><span class="fileinput-new"> No file chosen </span>
         </div>
-       <button type="button" class="btn btn-primary" id="upload-btn">Upload</button>
+       <button type="button" class="btn btn-primary" id="upload-btn"> Upload </button>
       </div>
     </div>
     <script src="{% static 'gui/index.js' %}"></script
