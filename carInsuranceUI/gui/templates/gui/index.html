@@ -1,8 +1,23 @@
 <html>
   <head>
     <title>Car Insurance Application</title>
+    {% load static %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
   </head>
   <body> Hello-hello!
-
+  {% csrf_token %}
+    <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="fileinput fileinput-new" data-provides="fileinput">
+          <span class="btn btn-default btn-file"><span>Choose file</span><input type="file"    multiple /> 
+          </span>
+          <span class="fileinput-filename"></span><span class="fileinput-new">No file chosen </span>
+        </div>
+       <button type="button" class="btn btn-primary" id="upload-btn">Upload</button>
+      </div>
+    </div>
+    <script src="{% static 'gui/index.js' %}"></script
   </body>
 </html>
