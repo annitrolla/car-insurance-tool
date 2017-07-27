@@ -1,11 +1,12 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 import os, sys
-sys.path.append("/Users/annaleontjeva/Software/openalpr/src")
-from openalpr import Alpr
+#sys.path.append("/Users/annaleontjeva/Software/openalpr/src")
+#from openalpr import Alpr
 import json
 import cv2
-import pdb
+import subprocess
+
 
 # Create your views here.
 
@@ -14,15 +15,10 @@ def index(request):
 
 
 def recognize_car_plate(request):
-    #files = json.loads(request.POST["files"])
     for filename, file in request.FILES.items():
-        print(filename, file)
         handle_uploaded_file(file, filename)
         image_name = save_first_frame(filename)
-        alpr_usage(image_name)
-
-    # call_annas_code:
-    # return annas_results 
+        print(subprocess.check_output(['alpr', image_name]))
     return HttpResponse("your files are")
 
 def handle_uploaded_file(file, filename):
@@ -32,15 +28,18 @@ def handle_uploaded_file(file, filename):
     destination_file.close()
 
 def save_first_frame(filename):
-    print("%s.mov"%filename)
-    vidcap = cv2.VideoCapture("%s.mov"%filename)
-    success, image = vidcap.read()
-    cv2.imwrite("frame_%s.png" % filename, image)
-    return "frame_%s.png" % filename
+    subprocess.check_output(['ffmpeg','-i', "%s.mov"%filename, '-vframes', '1', '-s', '640x480', '-y', '-f', 'image2', "frame_%s.jpg" % filename])
+    #vidcap = cv2.VideoCapture("%s.mov"%filename)
+    #success, image = vidcap.read()
+    #print(success, image)
+    #cv2.imwrite("frame_%s.jpg" % filename, image)
+    return "frame_%s.jpg" % filename
 
+"""
 def alpr_usage(image_name):
-    pdb.set_trace()
-    alpr = Alpr("eu", "/Users/annaleontjeva/Software/openalpr/config/openalpr.conf", "/Users/annaleontjeva/Software/openalpr/runtime_data")
+    image_name = "/home/irene/Repos/car-insurance-tool/ea7the.jpg"
+    #alpr = Alpr("eu", "/Users/annaleontjeva/Software/openalpr/config/openalpr.conf", "/Users/annaleontjeva/Software/openalpr/runtime_data")
+    alpr = Alpr("eu", "/home/irene/Repos/car-insurance-tool/openalpr-master/config/openalpr.conf.user", "/home/irene/Repos/car-insurance-tool/openalpr-master/runtime_data")
     if not alpr.is_loaded():
         print("Error loading OpenALPR")
         sys.exit(1)
@@ -64,6 +63,6 @@ def alpr_usage(image_name):
 	
     # Call when completely done to release memory
     alpr.unload()
-
+"""
 
 

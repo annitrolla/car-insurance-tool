@@ -1,1 +1,7 @@
 loxodon
+
+__pycache__
+
+*.pyc
+*.jpg
+*.mov
