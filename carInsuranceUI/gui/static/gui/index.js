@@ -1,13 +1,19 @@
 $('#upload-btn').on( 'click', function (e) {
     var cookie = getCookie('csrftoken'); 
     var files = document.getElementById('file-input').files;
-    var formdata = new FormData(files[0]);
+    var formdata = new FormData();
+    formdata.append('video', $("#file-input")[0].files[0]);
+    for (var [key, value] of formdata.entries()) { 
+  console.log(key, value);
+}
     
-    console.log(files);
     $.ajax({
         url: "recognize_car_plate",
-        method: 'POST',
-        data:{'video': formdata},
+        type: 'POST',
+        processData: false,
+        contentType: false,
+        data: formdata,
+        dataType: 'json',
         headers: {'X-CSRFToken': cookie},
         success: function(response){
             alert(response);
