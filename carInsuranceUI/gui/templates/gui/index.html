@@ -5,18 +5,16 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'gui/style.css' %}" />
   </head>
-  <body> Hello-hello!
-  {% csrf_token %}
+  <body> 
+    {% csrf_token %}
     <div class="container-fluid">
+      <h2>Car plate detection</h2>
       <div class="row-fluid">
-        <div class="fileinput fileinput-new" data-provides="fileinput">
-          <span class="btn btn-default btn-file"><span>Choose files</span>
-          <input type="file"    multiple id="file-input"/> 
-          </span>
-          <span class="fileinput-filename"></span><span class="fileinput-new"> No file chosen </span>
-        </div>
-       <button type="button" class="btn btn-primary" id="upload-btn"> Upload </button>
+        <input type="file" multiple id="file-input" data-multiple-caption="{count} files selected" />
+        <label for="file-input" class="btn btn-primary"><span>Choose a file</span></label>
+        <button type="button" class="btn btn-primary" id="upload-btn">Upload</button>
       </div>
     </div>
       <script src="{% static 'gui/index.js' %}"></script>
