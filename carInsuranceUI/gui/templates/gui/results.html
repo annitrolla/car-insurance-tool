@@ -1,15 +1,5 @@
-<html>
-  <head>
-    <title>Car Insurance Application</title>
-    {% load static %}
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
-  </head>
-  <body>
-    <div class="container-fluid">
-      <div class="row-fluid">
-          <table id="results_table" class="display" cellspacing="0" width="100%">
+          <img src="{{ image_url }}" alt="Car" height="120" width="160" style="margin-bottom:10px">
+          <table id="results-table" class="display" cellspacing="0" width="100%">
               <thead>
                   <tr>
                       <th>Plate number</th>
@@ -19,8 +9,8 @@
               </thead>
               {% for result in results %}
               <tr>
-                  <td>result.plate_nr</td>
-                  <td>result.confidence</td>
+                  <td>{{result.plate_nr}}</td>
+                  <td>{{result.confidence}}</td>
                   <td> </td>
               </tr>
               {% endfor %}
@@ -32,11 +22,11 @@
                   </tr>
               </tfoot>
           </table>
-      </div>
-    </div>
-      <script src="{% static 'gui/results.js' %}"></script>
-  </body>
-</html>
-
-
+          <script>
+              var table = $('#results-table').DataTable( {
+                  scrollX: true,
+                  cache: false,
+              } );
+          </script>
+          
 

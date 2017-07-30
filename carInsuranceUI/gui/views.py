@@ -18,6 +18,7 @@ def recognize_car_plate(request):
     for filename, f in request.FILES.items():
         handle_uploaded_file(f, f.name)
         image_folder = save_frames(f.name)
+        #image_folder = "image_files/IMG_5310/"
         
         for img_file in glob.glob("%s/*" % image_folder):
             results = str(subprocess.check_output(['alpr', '-c', 'eu', img_file]))
@@ -34,10 +35,7 @@ def recognize_car_plate(request):
                     break
         
         #best_results = [{'confidence': 90.2189, 'plate_nr': '35TVPV'}, {'confidence': 82.2031, 'plate_nr': '3STVPV'}, {'confidence': 78.4793, 'plate_nr': '35TVPY'}]
-    return redirect('result_server', results=best_results)
-    
-def result_server(request):
-    return render(request, "gui/results.html")
+    return render(request, "gui/results.html", {'results': best_results, 'image_url': img_file})
 
 def handle_uploaded_file(f, filename):
     destination_file = open(filename, 'wb+')

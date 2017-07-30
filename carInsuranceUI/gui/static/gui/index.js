@@ -1,25 +1,34 @@
+var ajaxXhr;
+
 $('#upload-btn').on( 'click', function (e) {
     var cookie = getCookie('csrftoken'); 
     var files = document.getElementById('file-input').files;
     var formdata = new FormData();
     formdata.append('video', $("#file-input")[0].files[0]);
-    for (var [key, value] of formdata.entries()) { 
-  console.log(key, value);
-}
     
-    $.ajax({
+    $('body').css('cursor', 'progress');
+    
+    ajaxXhr = $.ajax({
         url: "recognize_car_plate",
         type: 'POST',
         processData: false,
         contentType: false,
         data: formdata,
-        dataType: 'json',
+        dataType: 'html',
         headers: {'X-CSRFToken': cookie},
         success: function(response){
-              $('#container').html(response);
+            $('#results-div').html(response);
+            $('body').css('cursor', 'auto');
+        },
+        error: function(response){
+            $('body').css('cursor', 'auto');
         }
     });
 } );
+
+$('#cancel-btn').click(function(event) {
+    ajaxXhr.abort()
+});
 
 function getCookie(name) {
     var cookieValue = null;

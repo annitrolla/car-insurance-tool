@@ -4,6 +4,8 @@
     {% load static %}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="{% static 'gui/style.css' %}" />
   </head>
@@ -15,7 +17,12 @@
         <input type="file" multiple id="file-input" data-multiple-caption="{count} files selected" />
         <label for="file-input" class="btn btn-primary"><span>Choose a file</span></label>
         <button type="button" class="btn btn-primary" id="upload-btn">Upload</button>
+        <button type="button" class="btn btn-danger" id="cancel-btn">Cancel</button>
       </div>
+        
+      <div class="row-fluid" id="results-div" style="margin-top:10px">
+      </div>
+        
     </div>
       <script src="{% static 'gui/index.js' %}"></script>
   </body>
