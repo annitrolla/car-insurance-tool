@@ -16,7 +16,7 @@ $('#upload-btn').on( 'click', function (e) {
         dataType: 'json',
         headers: {'X-CSRFToken': cookie},
         success: function(response){
-            alert(response);
+              $('#container').html(response);
         }
     });
 } );

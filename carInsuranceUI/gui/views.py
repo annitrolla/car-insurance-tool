@@ -1,11 +1,11 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 import os, sys
-#sys.path.append("/Users/annaleontjeva/Software/openalpr/src")
-#from openalpr import Alpr
 import json
 import cv2
 import subprocess
+import glob
+import re
 
 
 # Create your views here.
@@ -15,54 +15,41 @@ def index(request):
 
 
 def recognize_car_plate(request):
-    for filename, file in request.FILES.items():
-        handle_uploaded_file(file, filename)
-        image_name = save_first_frame(filename)
-        print(subprocess.check_output(['alpr', image_name]))
-    return HttpResponse("your files are")
+    for filename, f in request.FILES.items():
+        handle_uploaded_file(f, f.name)
+        image_folder = save_frames(f.name)
+        
+        for img_file in glob.glob("%s/*" % image_folder):
+            results = str(subprocess.check_output(['alpr', '-c', 'eu', img_file]))
+            results = results[1:].strip("'").split("\\n")[1:]
+            if len(results) > 1:
+                m = re.match(r"- (\w*)\\t confidence: (\d*.\d*)", results[0].strip())
+                plate_nr, confidence = m.group(1), float(m.group(2))
+                if confidence >= 88:
+                    best_results = []
+                    for i in range(3):
+                        m = re.match(r"- (\w*)\\t confidence: (\d*.\d*)", results[i].strip())
+                        best_results.append({"plate_nr": m.group(1), "confidence": float(m.group(2))})
+                    print(best_results)
+                    break
+        
+        #best_results = [{'confidence': 90.2189, 'plate_nr': '35TVPV'}, {'confidence': 82.2031, 'plate_nr': '3STVPV'}, {'confidence': 78.4793, 'plate_nr': '35TVPY'}]
+    return redirect('result_server', results=best_results)
+    
+def result_server(request):
+    return render(request, "gui/results.html")
 
-def handle_uploaded_file(file, filename):
-    destination_file = open("%s.mov"%filename, 'wb+')
-    for chunk in file.chunks():
+def handle_uploaded_file(f, filename):
+    destination_file = open(filename, 'wb+')
+    for chunk in f.chunks():
         destination_file.write(chunk)
     destination_file.close()
 
-def save_first_frame(filename):
-    subprocess.check_output(['ffmpeg','-i', "%s.mov"%filename, '-vframes', '1', '-s', '640x480', '-y', '-f', 'image2', "frame_%s.jpg" % filename])
-    #vidcap = cv2.VideoCapture("%s.mov"%filename)
-    #success, image = vidcap.read()
-    #print(success, image)
-    #cv2.imwrite("frame_%s.jpg" % filename, image)
-    return "frame_%s.jpg" % filename
-
-"""
-def alpr_usage(image_name):
-    image_name = "/home/irene/Repos/car-insurance-tool/ea7the.jpg"
-    #alpr = Alpr("eu", "/Users/annaleontjeva/Software/openalpr/config/openalpr.conf", "/Users/annaleontjeva/Software/openalpr/runtime_data")
-    alpr = Alpr("eu", "/home/irene/Repos/car-insurance-tool/openalpr-master/config/openalpr.conf.user", "/home/irene/Repos/car-insurance-tool/openalpr-master/runtime_data")
-    if not alpr.is_loaded():
-        print("Error loading OpenALPR")
-        sys.exit(1)
-    alpr.set_top_n(20)
-    alpr.set_default_region("md")
-    if os.path.isfile(image_name):
-        results = alpr.recognize_file(image_name)
-        i = 0
-        for plate in results['results']:
-            i += 1
-            print("Plate #%d" % i)
-            print("   %12s %12s" % ("Plate", "Confidence"))
-            for candidate in plate['candidates']:
-                prefix = "-"
-                if candidate['matches_template']:
-                    prefix = "*"
-
-                print("  %s %12s%12f" % (prefix, candidate['plate'], candidate['confidence']))
-    else:
-        raise Exception("image file not found")
-	
-    # Call when completely done to release memory
-    alpr.unload()
-"""
+def save_frames(filename):
+    directory = os.path.join("image_files", filename[:-4])
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    subprocess.check_output(['ffmpeg','-i', filename, '-vf', 'scale=320:-1', '-r', '10', '-y', os.path.join(directory, "frame_%3d.png")])
+    return directory
 
 
