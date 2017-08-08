@@ -34,6 +34,7 @@ def recognize_car_plate(request):
             return render(request, "gui/results.html", {'results': []}) 
         elif m.group(1) == 'mov' or m.group(1) == 'mp4':
             save_video(f, f.name, VIDEO_DIR)
+            print(video_metadata(os.path.join(VIDEO_DIR, f.name)))
             save_frames(os.path.join(VIDEO_DIR, f.name), current_image_dir)
             
         #elif m.group(1) == 'mp4':
@@ -55,6 +56,10 @@ def save_video(f, filename, directory):
         destination_file.write(chunk)
     destination_file.close()
 
+def video_metadata(filename):
+    metadata = subprocess.check_output(['exiftool', '-a', '-u', '-g1', filename])
+    return metadata
+    
 def save_frames(filepath, directory):
     subprocess.check_output(['ffmpeg','-i', filepath, '-vf', 'scale=320:-1', '-r', '10', '-y', os.path.join(directory, "frame_%3d.png")])
        
