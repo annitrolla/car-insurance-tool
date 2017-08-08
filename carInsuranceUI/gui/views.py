@@ -6,6 +6,7 @@ import cv2
 import subprocess
 import glob
 import re
+import requests
 
 
 # Create your views here.
@@ -33,7 +34,18 @@ def recognize_car_plate(request):
                         best_results.append({"plate_nr": m.group(1), "confidence": float(m.group(2))})
                     print(best_results)
                     break
-        
+    for car_data in best_results:
+        url = "http://api.datamarket.azure.com/opendata.rdw/VRTG.Open.Data/v1/KENT_VRTG_O_DAT(\'%s\')?$format=json" % car_data['plate_nr']
+        r = requests.get(url).json()
+        if "error" in r:
+            car_data["exists_in_rdw"] = "Does not exist"
+            car_data["color"] = "-"
+            car_data["brand"] = "-"
+        else:
+            car_data["exists_in_rdw"] = "Exists"
+            car_data["color"] = r["d"]["Eerstekleur"]
+            car_data["brand"] = r["d"]["Merk"]
+            
         #best_results = [{'confidence': 90.2189, 'plate_nr': '35TVPV'}, {'confidence': 82.2031, 'plate_nr': '3STVPV'}, {'confidence': 78.4793, 'plate_nr': '35TVPY'}]
     return render(request, "gui/results.html", {'results': best_results, 'image_url': img_file})
 

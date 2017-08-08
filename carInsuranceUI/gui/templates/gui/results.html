@@ -5,13 +5,17 @@
                       <th>Plate number</th>
                       <th>Confidence</th>
                       <th>Exists in RDW</th>
+                      <th>Color</th>
+                      <th>Brand</th>
                   </tr>
               </thead>
               {% for result in results %}
               <tr>
                   <td>{{result.plate_nr}}</td>
                   <td>{{result.confidence}}</td>
-                  <td> </td>
+                  <td>{{result.exists_in_rdw}}</td>
+                  <td>{{result.color}}</td>
+                  <td>{{result.brand}}</td>
               </tr>
               {% endfor %}
               <tfoot>
@@ -19,6 +23,8 @@
                       <th>Plate number</th>
                       <th>Confidence</th>
                       <th>Exists in RDW</th>
+                      <th>Color</th>
+                      <th>Brand</th>
                   </tr>
               </tfoot>
           </table>
