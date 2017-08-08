@@ -10,56 +10,78 @@ import requests
 
 
 # Create your views here.
+VIDEO_DIR = 'video_files'
+IMAGE_DIR = 'image_files'
+
+
 
 def index(request):
     return render(request, "gui/index.html")
 
 
 def recognize_car_plate(request):
-    for filename, f in request.FILES.items():
-        handle_uploaded_file(f, f.name)
-        image_folder = save_frames(f.name)
-        #image_folder = "image_files/IMG_5310/"
-        
-        for img_file in glob.glob("%s/*" % image_folder):
-            results = str(subprocess.check_output(['alpr', '-c', 'eu', img_file]))
-            results = results[1:].strip("'").split("\\n")[1:]
-            if len(results) > 1:
-                m = re.match(r"- (\w*)\\t confidence: (\d*.\d*)", results[0].strip())
-                plate_nr, confidence = m.group(1), float(m.group(2))
-                if confidence >= 88:
-                    best_results = []
-                    for i in range(3):
-                        m = re.match(r"- (\w*)\\t confidence: (\d*.\d*)", results[i].strip())
-                        best_results.append({"plate_nr": m.group(1), "confidence": float(m.group(2))})
-                    print(best_results)
-                    break
-    for car_data in best_results:
-        url = "http://api.datamarket.azure.com/opendata.rdw/VRTG.Open.Data/v1/KENT_VRTG_O_DAT(\'%s\')?$format=json" % car_data['plate_nr']
-        r = requests.get(url).json()
-        if "error" in r:
-            car_data["exists_in_rdw"] = "Does not exist"
-            car_data["color"] = "-"
-            car_data["brand"] = "-"
-        else:
-            car_data["exists_in_rdw"] = "Exists"
-            car_data["color"] = r["d"]["Eerstekleur"]
-            car_data["brand"] = r["d"]["Merk"]
+    for _, f in request.FILES.items():
+        if not os.path.exists(IMAGE_DIR):
+            os.makedirs(IMAGE_DIR)
+        if not os.path.exists(VIDEO_DIR):
+            os.makedirs(VIDEO_DIR)
+        current_image_dir = os.path.join(IMAGE_DIR, f.name[:-4])    
+        if not os.path.exists(current_image_dir):
+            os.makedirs(current_image_dir)
             
+        m = re.match(r"\w*.(\w{3,4})", f.name.lower())
+        if m is None:
+            return render(request, "gui/results.html", {'results': []}) 
+        elif m.group(1) == 'mov' or m.group(1) == 'mp4':
+            save_video(f, f.name, VIDEO_DIR)
+            save_frames(os.path.join(VIDEO_DIR, f.name), current_image_dir)
+            
+        #elif m.group(1) == 'mp4':
+        #    save_mp4_to_frames(f, f.name, directory)
+
+        for img_file in glob.glob("%s/*" % current_image_dir):
+            print(img_file)
+            best_results = recognize_image(img_file, top_best=3, conf_level=88)
+            if len(best_results) > 0:
+                break
+        for car_data in best_results:
+            car_data = request_rdw(car_data)
         #best_results = [{'confidence': 90.2189, 'plate_nr': '35TVPV'}, {'confidence': 82.2031, 'plate_nr': '3STVPV'}, {'confidence': 78.4793, 'plate_nr': '35TVPY'}]
     return render(request, "gui/results.html", {'results': best_results, 'image_url': img_file})
 
-def handle_uploaded_file(f, filename):
-    destination_file = open(filename, 'wb+')
+def save_video(f, filename, directory):
+    destination_file = open(os.path.join(directory, filename), 'wb+')
     for chunk in f.chunks():
         destination_file.write(chunk)
     destination_file.close()
 
-def save_frames(filename):
-    directory = os.path.join("image_files", filename[:-4])
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-    subprocess.check_output(['ffmpeg','-i', filename, '-vf', 'scale=320:-1', '-r', '10', '-y', os.path.join(directory, "frame_%3d.png")])
-    return directory
+def save_frames(filepath, directory):
+    subprocess.check_output(['ffmpeg','-i', filepath, '-vf', 'scale=320:-1', '-r', '10', '-y', os.path.join(directory, "frame_%3d.png")])
+       
+def recognize_image(filename, top_best=3, conf_level=88):
+    results = str(subprocess.check_output(['alpr', '-c', 'eu', filename]))
+    results = results[1:].strip("'").split("\\n")[1:]
+    best_results = []
+    if len(results) > 1:
+        m = re.match(r"- (\w*)\\t confidence: (\d*.\d*)", results[0].strip())
+        plate_nr, confidence = m.group(1), float(m.group(2))
+        if confidence >= conf_level:
+            for i in range(top_best):
+                m = re.match(r"- (\w*)\\t confidence: (\d*.\d*)", results[i].strip())
+                best_results.append({"plate_nr": m.group(1), "confidence": float(m.group(2))})
+    return best_results
+    
+def request_rdw(car_data):
+    url = "http://api.datamarket.azure.com/opendata.rdw/VRTG.Open.Data/v1/KENT_VRTG_O_DAT(\'%s\')?$format=json" % car_data['plate_nr']
+    r = requests.get(url).json()
+    if "error" in r:
+        car_data["exists_in_rdw"] = "Does not exist"
+        car_data["color"] = "-"
+        car_data["brand"] = "-"
+    else:
+        car_data["exists_in_rdw"] = "Exists"
+        car_data["color"] = r["d"]["Eerstekleur"]
+        car_data["brand"] = r["d"]["Merk"]
+    return car_data
 
 
