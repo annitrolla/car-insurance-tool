@@ -23,21 +23,36 @@ def recognize_image(filename, top_best=10):
     return best_results
     
 def request_rdw(car_data):
-    url = "http://api.datamarket.azure.com/opendata.rdw/VRTG.Open.Data/v1/KENT_VRTG_O_DAT(\'%s\')?$format=json" % car_data['plate_nr']
-    r = requests.get(url).json()
-    if "error" in r:
-        car_data["exists_in_rdw"] = "Does not exist"
-        car_data["color"] = "-"
-        car_data["brand"] = "-"
+    if car_data['plate_nr'] in rdw_data_dict:
+        car_data["exists_in_rdw"] = rdw_data_dict[car_data['plate_nr']]["exists_in_rdw"]
+        car_data["color"] = rdw_data_dict[car_data['plate_nr']]["color"]
+        car_data["brand"] = rdw_data_dict[car_data['plate_nr']]["brand"]
     else:
-        car_data["exists_in_rdw"] = "Exists"
-        car_data["color"] = r["d"]["Eerstekleur"]
-        car_data["brand"] = r["d"]["Merk"]
+        url = "http://api.datamarket.azure.com/opendata.rdw/VRTG.Open.Data/v1/KENT_VRTG_O_DAT(\'%s\')?$format=json" % car_data['plate_nr']
+        r = requests.get(url).json()
+        rdw_data_dict[car_data['plate_nr']] = {}
+        if "error" in r:
+            car_data["exists_in_rdw"] = "Does not exist"
+            car_data["color"] = "-"
+            car_data["brand"] = "-"
+
+            rdw_data_dict[car_data['plate_nr']]["exists_in_rdw"] = "Does not exist"
+            rdw_data_dict[car_data['plate_nr']]["color"] = "-"
+            rdw_data_dict[car_data['plate_nr']]["brand"] = "-"
+        else:
+            car_data["exists_in_rdw"] = "Exists"
+            car_data["color"] = r["d"]["Eerstekleur"]
+            car_data["brand"] = r["d"]["Merk"]
+
+            rdw_data_dict[car_data['plate_nr']]["exists_in_rdw"] = "Exists"
+            rdw_data_dict[car_data['plate_nr']]["color"] = r["d"]["Eerstekleur"]
+            rdw_data_dict[car_data['plate_nr']]["brand"] = r["d"]["Merk"]
     return car_data
 
+rdw_data_dict = {}
 
 results_file = 'loxodon_results.csv'
-video_dir = '/Users/annaleontjeva/Projects/Loxodon/Movies'
+video_dir = 'Movies'
 image_dir = 'analyze_images'
 if not os.path.exists(image_dir):
     os.makedirs(image_dir)
