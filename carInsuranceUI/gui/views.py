@@ -58,10 +58,17 @@ def save_video(f, filename, directory):
 
 def video_metadata(filename):
     metadata = subprocess.check_output(['exiftool', '-a', '-u', '-g1', filename])
-    return metadata
+    m = re.match(r'GPS Coordinates\s*:\s*([\w\'" ,\\.\\]*)\\n', str(metadata))
+    if m:
+        print(m.group(1))
+    else:
+        print('Did not match anything')
+    parts = str(metadata).strip().split('\\n')
+    for part in parts:
+        print(part)
     
 def save_frames(filepath, directory):
-    subprocess.check_output(['ffmpeg','-i', filepath, '-vf', 'scale=320:-1', '-r', '10', '-y', os.path.join(directory, "frame_%3d.png")])
+    subprocess.check_output(['ffmpeg','-loglevel', 'panic','-i', filepath, '-vf', 'scale=320:-1', '-r', '10', '-y', os.path.join(directory, "frame_%3d.png")])
        
 def recognize_image(filename, top_best=3, conf_level=88):
     results = str(subprocess.check_output(['alpr', '-c', 'eu', filename]))

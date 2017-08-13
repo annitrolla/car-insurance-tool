@@ -1,0 +1,19 @@
+video_file,is_valid_file,frame,plate_nr,confidence,exists_in_rdw,car_color,car_brand,prediction_rank
+20170804_122727[1],False,NA,NA,NA,NA,NA,NA,NA
+20170804_122942[1],True,NA,NA,NA,NA,NA,NA,NA
+20170804_123147[1],True,NA,NA,NA,NA,NA,NA,NA
+20170806_125933,True,frame_001.png,STLG33,92.3689,Exists,GROEN,SUBARU,0
+20170806_125933,True,frame_001.png,5TLG33,82.2424,Exists,ZWART,MITSUBISHI,1
+20170806_125933,True,frame_001.png,STL033,80.9685,Does not exist,-,-,2
+20170806_125933,True,frame_001.png,STLC33,80.7902,Does not exist,-,-,3
+20170806_125933,True,frame_001.png,STL33,79.7448,Does not exist,-,-,4
+20170806_125933,True,frame_001.png,5TL033,70.842,Does not exist,-,-,5
+20170806_125933,True,frame_001.png,5TLC33,70.6637,Does not exist,-,-,6
+20170806_125933,True,frame_001.png,5TL33,69.6183,Does not exist,-,-,7
+20170806_125933,True,frame_002.png,STLG33,92.9424,Exists,GROEN,SUBARU,0
+20170806_125933,True,frame_002.png,5TLG33,82.7756,Exists,ZWART,MITSUBISHI,1
+20170806_125933,True,frame_002.png,STL033,80.9998,Does not exist,-,-,2
+20170806_125933,True,frame_002.png,STL33,79.1057,Does not exist,-,-,3
+20170806_125933,True,frame_002.png,5TL033,70.833,Does not exist,-,-,4
+20170806_125933,True,frame_002.png,5TL33,68.9389,Does not exist,-,-,5
+20170806_125933,True,frame_003.png,STLG33,91.5712,Exists,GROEN,SUBARU,0
