@@ -13,6 +13,7 @@ import requests
 VIDEO_DIR = 'video_files'
 IMAGE_DIR = 'image_files'
 
+relevant_metadata_fields = ["MovieDataSize"]
 
 
 def index(request):
@@ -32,9 +33,10 @@ def recognize_car_plate(request):
         m = re.match(r"\w*.(\w{3,4})", f.name.lower())
         if m is None:
             return render(request, "gui/results.html", {'results': []}) 
-        elif m.group(1) == 'mov' or m.group(1) == 'mp4':
+        #elif m.group(1) == 'mov' or m.group(1) == 'mp4':
+        else:
             save_video(f, f.name, VIDEO_DIR)
-            print(video_metadata(os.path.join(VIDEO_DIR, f.name)))
+            metadata = video_metadata(os.path.join(VIDEO_DIR, f.name))
             save_frames(os.path.join(VIDEO_DIR, f.name), current_image_dir)
             
         #elif m.group(1) == 'mp4':
@@ -48,7 +50,7 @@ def recognize_car_plate(request):
         for car_data in best_results:
             car_data = request_rdw(car_data)
         #best_results = [{'confidence': 90.2189, 'plate_nr': '35TVPV'}, {'confidence': 82.2031, 'plate_nr': '3STVPV'}, {'confidence': 78.4793, 'plate_nr': '35TVPY'}]
-    return render(request, "gui/results.html", {'results': best_results, 'image_url': img_file})
+    return render(request, "gui/results.html", {'results': best_results, 'image_url': img_file, 'metadata': metadata})
 
 def save_video(f, filename, directory):
     destination_file = open(os.path.join(directory, filename), 'wb+')
@@ -57,15 +59,16 @@ def save_video(f, filename, directory):
     destination_file.close()
 
 def video_metadata(filename):
-    metadata = subprocess.check_output(['exiftool', '-a', '-u', '-g1', filename])
-    m = re.match(r'GPS Coordinates\s*:\s*([\w\'" ,\\.\\]*)\\n', str(metadata))
-    if m:
-        print(m.group(1))
-    else:
-        print('Did not match anything')
-    parts = str(metadata).strip().split('\\n')
+    all_metadata = subprocess.check_output(['exiftool', '-a', '-u', '-g1', filename])
+    parts = str(all_metadata).strip().split('\\n')
+    metadata = []
     for part in parts:
-        print(part)
+        split_parts = part.split(" : ")
+        if len(split_parts) > 1 and split_parts[0].strip().replace(" ", "") in relevant_metadata_fields:
+            metadata.append({'key': split_parts[0].strip().replace(" ", ""),
+                             'value': split_parts[1].strip(),
+                             'suspicious': False})
+    return metadata
     
 def save_frames(filepath, directory):
     subprocess.check_output(['ffmpeg','-loglevel', 'panic','-i', filepath, '-vf', 'scale=320:-1', '-r', '10', '-y', os.path.join(directory, "frame_%3d.png")])
