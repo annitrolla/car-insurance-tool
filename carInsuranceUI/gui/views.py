@@ -13,7 +13,14 @@ import requests
 VIDEO_DIR = 'video_files'
 IMAGE_DIR = 'image_files'
 
-relevant_metadata_fields = ["MovieDataSize"]
+metadata_fields_must_exist = [ "GPS Longitude", "GPS Latitude", "Pixel Aspect Ratio", "Color Representation", "GPS Position",
+                              "GPS Coordinates"]
+metadata_fields_cant_exist = ["Compressor Name", "Encoder", "Purchase File Format"]
+metadata_fields_cant_equal = {"Compatible Brands": 'qt', 'Handler Type': "URL", 'Handler Description': "DataHandler",
+                             "Modify Date": "0000:00:00 00:00:00", "Create Date": "0000:00:00 00:00:00"}
+metadata_fields_must_be_lte = {"Movie Data Size": 25000000, "File Size": 25, "Duration": 25}
+
+# file size: xx MB, track duration: xx s, 00:00:30 
 
 
 def index(request):
@@ -61,14 +68,66 @@ def save_video(f, filename, directory):
 def video_metadata(filename):
     all_metadata = subprocess.check_output(['exiftool', '-a', '-u', '-g1', filename])
     parts = str(all_metadata).strip().split('\\n')
-    metadata = []
-    for part in parts:
-        split_parts = part.split(" : ")
-        if len(split_parts) > 1 and split_parts[0].strip().replace(" ", "") in relevant_metadata_fields:
-            metadata.append({'key': split_parts[0].strip().replace(" ", ""),
-                             'value': split_parts[1].strip(),
-                             'suspicious': False})
-    return metadata
+    metadata = {part.split(" : ")[0].strip(): part.split(" : ")[1].strip() for part in parts if len(part.split(" : ")) > 1}
+    
+    relevant_metadata = []
+        
+    for field in metadata_fields_must_exist:
+        if field in metadata:
+            relevant_metadata.append({'key': field, 'value': metadata[field], 'suspicious': False})
+        else:
+            relevant_metadata.append({'key': field, 'value': "-", 'suspicious': True})
+    
+    for field in metadata_fields_cant_exist:
+        if field in metadata:
+            relevant_metadata.append({'key': field, 'value': metadata[field], 'suspicious': True})
+        else:
+            relevant_metadata.append({'key': field, 'value': "-", 'suspicious': False})
+    
+    for field, value in metadata_fields_cant_equal.items():
+        if field not in metadata:
+            relevant_metadata.append({'key': field, 'value': "-", 'suspicious': False})
+        elif metadata[field] == value:
+            relevant_metadata.append({'key': field, 'value': metadata[field], 'suspicious': True})
+        else:
+            relevant_metadata.append({'key': field, 'value': metadata[field], 'suspicious': False})
+     
+    field = "Movie Data Size"
+    if field in metadata:
+        val = int(metadata[field])
+        if val > metadata_fields_must_be_lte[field]:
+            relevant_metadata.append({'key': field, 'value': metadata[field], 'suspicious': True})
+        else:
+            relevant_metadata.append({'key': field, 'value': metadata[field], 'suspicious': False})
+    else:
+        relevant_metadata.append({'key': field, 'value': "-", 'suspicious': False})
+    
+    field = "File Size"
+    if field in metadata:
+        val = int(metadata[field].split(" ")[0])
+        if val > metadata_fields_must_be_lte[field]:
+            relevant_metadata.append({'key': field, 'value': metadata[field], 'suspicious': True})
+        else:
+            relevant_metadata.append({'key': field, 'value': metadata[field], 'suspicious': False})
+    else:
+        relevant_metadata.append({'key': field, 'value': "-", 'suspicious': False})
+        
+    field = "Duration"
+    if field in metadata:
+        val = metadata[field].split(" ")
+        if len(val) > 1:
+            val = float(val[0])
+        else:
+            val_parts = metadata[field].split(":")
+            val = int(val_parts[-1]) + 60 * int(val_parts[-2]) + 60 * int(val_parts[-3])
+        if val > metadata_fields_must_be_lte[field]:
+            relevant_metadata.append({'key': field, 'value': metadata[field], 'suspicious': True})
+        else:
+            relevant_metadata.append({'key': field, 'value': metadata[field], 'suspicious': False})
+    else:
+        relevant_metadata.append({'key': field, 'value': "-", 'suspicious': False})
+        
+    return relevant_metadata
     
 def save_frames(filepath, directory):
     subprocess.check_output(['ffmpeg','-loglevel', 'panic','-i', filepath, '-vf', 'scale=320:-1', '-r', '10', '-y', os.path.join(directory, "frame_%3d.png")])

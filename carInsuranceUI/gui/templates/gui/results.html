@@ -1,29 +1,31 @@
           
       <div class="row-fluid" id="img-meta-div" style="margin-top:10px">
-          <div class="col-xs-3">
+          <div class="col-xs-4">
             <img src="{{ image_url }}" alt="Car" height="300" style="margin-bottom:10px">
           </div>
-          <div class="col-xs-3">
-            <table id="metadata-table" class="display" cellspacing="0" width="100%">
-              <thead>
-                  <tr>
-                      <th>Attribute</th>
-                      <th>Value</th>
-                      <th>Result</th>
-                  </tr>
-              </thead>
-              {% for meta in metadata %}
-              <tr>
-                  <td>{{meta.key}}</td>
-                  <td>{{meta.value}}</td>
-                  {% if meta.suspicious %}
-                      <td><span class="label label-danger">Suspicious</span></td>
-                  {% else %}
-                      <td><span class="label label-success">OK</span></td>
-                  {% endif %}
-              </tr>
-              {% endfor %}
-          </table>
+          <div class="col-xs-4 panel panel-default">
+              <div class="panel-body">
+                  <table id="metadata-table" class="display" cellspacing="0" width="100%">
+                      <thead>
+                          <tr>
+                              <th>Attribute</th>
+                              <th>Value</th>
+                              <th>Result</th>
+                          </tr>
+                      </thead>
+                      {% for meta in metadata %}
+                      <tr>
+                          <td>{{meta.key}}</td>
+                          <td>{{meta.value}}</td>
+                          {% if meta.suspicious %}
+                          <td><span class="label label-danger">Suspicious</span></td>
+                          {% else %}
+                          <td><span class="label label-success">OK</span></td>
+                          {% endif %}
+                      </tr>
+                      {% endfor %}
+                  </table>
+              </div>
           </div>
       </div>
 
