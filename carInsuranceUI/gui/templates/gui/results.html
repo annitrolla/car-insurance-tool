@@ -1,19 +1,21 @@
           
       <div class="row-fluid" id="img-meta-div" style="margin-top:10px">
           <div class="col-xs-3">
-            <img src="{{ image_url }}" alt="Car" max-height="150px" width="auto" style="margin-bottom:10px">
+            <img src="{{ image_url }}" alt="Car" height="300" style="margin-bottom:10px">
           </div>
           <div class="col-xs-3">
             <table id="metadata-table" class="display" cellspacing="0" width="100%">
               <thead>
                   <tr>
-                      <th>Metadata</th>
+                      <th>Attribute</th>
+                      <th>Value</th>
                       <th>Result</th>
                   </tr>
               </thead>
               {% for meta in metadata %}
               <tr>
-                  <td>{{meta.key}}: {{meta.value}}</td>
+                  <td>{{meta.key}}</td>
+                  <td>{{meta.value}}</td>
                   {% if meta.suspicious %}
                       <td><span class="label label-danger">Suspicious</span></td>
                   {% else %}
