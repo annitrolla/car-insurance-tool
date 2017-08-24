@@ -128,63 +128,119 @@ def process_rect(screenCnt):
 
 rdw_data_dict = {}
 
-results_file = 'loxodon_results_image_processing.csv'
-video_dir = 'Movies'
+results_file = 'loxodon_results_image_processing5.csv'
+video_dir = 'Movies2'
 image_dir = 'analyze_images'
 if not os.path.exists(image_dir):
     os.makedirs(image_dir)
     
 with open(results_file, 'w') as fout:
-    header = ['video_file', 'is_valid_file', 'frame', 'plate_nr', 'confidence', 'exists_in_rdw', 'car_color', 'car_brand', 'prediction_rank']
+    header = ['video_file', 'is_valid_file', 'frame', 'plate_nr', 'confidence', 'exists_in_rdw', 'car_color', 'car_brand', 'prediction_rank', 'processed']
     fout.write(",".join(header))
     fout.write("\n")
+    
     for video_file in glob.glob("%s/*" % video_dir):
         print(video_file)
-        current_image_dir = os.path.join(image_dir, os.path.basename(video_file)[:-4])
+        
+        filename = os.path.basename(video_file)
+        file_basename, file_extension = os.path.splitext(filename)
+        
+        current_image_dir = os.path.join(image_dir, file_basename)
         if not os.path.exists(current_image_dir):
             os.makedirs(current_image_dir)
         try:
-            save_frames(video_file, current_image_dir)
-            
+            # file is an image file
+            if file_extension in ['jpg', 'jpeg', 'png']:
+                
+                # convert to png if necessary (alpr works better with png than with jpg)
+                if file_extension != "png":
+                    subprocess.check_output(['mogrify', '-format', 'png', '-g1', video_file])
+                filename = video_file.replace(file_extension, "png")
+                subprocess.check_output(['cp', filename, current_image_dir])
+
+            # file is a video file
+            else:
+                # extract frames from video using ffmpeg
+                save_frames(video_file, current_image_dir)
+
             results_found = False
             confident_results_found = False
             for img_file in glob.glob("%s/*" % current_image_dir):
+                # try alpr without processing
+                results = recognize_image(img_file)
+                for i, result in enumerate(results):
+                    if len(result['plate_nr']) == 6:
+                        results_found = True
+                        result = request_rdw(result)
+                        fout.write(",".join([file_basename, "True",
+                                        os.path.basename(img_file),
+                                        result['plate_nr'], str(result['confidence']),
+                                        result['exists_in_rdw'], result['color'],
+                                        result['brand'], str(i), "False"]))
+                        fout.write("\n")
+                        
+                        # try replacing "J" with "4"
+                        if result['exists_in_rdw'] != "Exists" and "J" in result['plate_nr']:
+                            result['plate_nr'] = result['plate_nr'].replace("J", "4")
+                            result = request_rdw(result)
+                            if result['exists_in_rdw'] == "Exists":
+                                fout.write(",".join([file_basename, "True",
+                                        os.path.basename(img_file),
+                                        result['plate_nr'], str(result['confidence']),
+                                        result['exists_in_rdw'], result['color'],
+                                        result['brand'], str(i)+"a", "False"]))
+                                fout.write("\n")
+                        
+                        if result['exists_in_rdw'] == "Exists" and result['confidence'] > 80:
+                            confident_results_found = True
+                
                 # process image
                 image = cv2.imread(img_file)
                 screenCnt = get_edges(image)
                 if screenCnt is None:
                     print("No 4-cornered contour found")
-                    continue
-                warp = process_rect(screenCnt)
-                warp_padded = cv2.copyMakeBorder(warp, 50, 50, 50, 50, cv2.BORDER_CONSTANT)
-                cv2.imwrite('warped.png',warp_padded)
-            
-                results = recognize_image('warped.png')
-                if len(results) > 0:
-                    results_found = True
-                for i, result in enumerate(results):
-                    result = request_rdw(result)
-                    fout.write(",".join([os.path.basename(video_file)[:-4], "True",
-                                        os.path.basename(img_file),
-                                        result['plate_nr'], str(result['confidence']),
-                                        result['exists_in_rdw'], result['color'],
-                                        result['brand'], str(i)]))
-                    fout.write("\n")
-                    if result['exists_in_rdw'] == "Exists" and result['confidence'] > 80:
-                        confident_results_found = True
+                else:
+                    warp = process_rect(screenCnt)
+                    warp_padded = cv2.copyMakeBorder(warp, 50, 50, 50, 50, cv2.BORDER_CONSTANT)
+                    cv2.imwrite('warped.png',warp_padded)
+
+                    # alpr
+                    results = recognize_image('warped.png')
+                    for i, result in enumerate(results):
+                        if len(result['plate_nr']) == 6:
+                            results_found = True
+                            result = request_rdw(result)
+                            fout.write(",".join([os.path.basename(video_file)[:-4], "True",
+                                                os.path.basename(img_file),
+                                                result['plate_nr'], str(result['confidence']),
+                                                result['exists_in_rdw'], result['color'],
+                                                result['brand'], str(i), "True"]))
+                            fout.write("\n")
+                            
+                            # try replacing "J" with "4"
+                            if result['exists_in_rdw'] != "Exists" and "J" in result['plate_nr']:
+                                result['plate_nr'] = result['plate_nr'].replace("J", "4")
+                                result = request_rdw(result)
+                                if result['exists_in_rdw'] == "Exists":
+                                    fout.write(",".join([file_basename, "True",
+                                            os.path.basename(img_file),
+                                            result['plate_nr'], str(result['confidence']),
+                                            result['exists_in_rdw'], result['color'],
+                                            result['brand'], str(i)+"a", "True"]))
+                                    fout.write("\n")
+                            
+                            if result['exists_in_rdw'] == "Exists" and result['confidence'] > 80:
+                                confident_results_found = True
                 if confident_results_found:
                     break
             if not results_found:
                 fout.write(",".join([os.path.basename(video_file)[:-4], "True",
-                                    'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA'
+                                    'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA'
                                     ]))
             fout.write("\n") 
         except subprocess.CalledProcessError:
             fout.write(",".join([os.path.basename(video_file)[:-4], "False",
-                                    'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA'
+                                    'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA'
                                     ]))
             fout.write("\n")
             
-        
-
-        
