@@ -1,5 +1,13 @@
-          
-      <div class="row-fluid" id="img-meta-div" style="margin-top:10px">
+      {% if file_corrupt %}
+      <td><div class="error-alert">
+        <div class="alert alert-danger fade in">
+        <a href="#" class="close" data-dismiss="alert">&times;</a>
+        <strong>Error!</strong> A problem has been occurred while processing your video. Check if the file is corrupted.
+        </div>
+      </div> 
+      </td>
+        {% else %}
+        <div class="row-fluid" id="img-meta-div" style="margin-top:10px">
           <div class="col-xs-4">
             <img src="{{ image_url }}" alt="Car" height="300" style="margin-bottom:10px">
           </div>
@@ -67,3 +75,4 @@
               } );
           </script>
       </div>
+{% endif %}
