@@ -1,10 +1,10 @@
-setwd("Projects/Loxodon/car-insurance-tool")
+setwd("car-insurance-tool")
 library(data.table)
 library(tidyverse)
 library(lubridate)
 
 
-dt <- read.table("/Users/annaleontjeva/Projects/Loxodon/car-insurance-tool/loxodon_results_image_processing.csv", header=T, sep=',')
+dt <- read.table("results_image_processing.csv", header=T, sep=',')
 
 table(dt_preproc$is_valid_file)
 length(unique(dt$video_file)) # 51 unique files
