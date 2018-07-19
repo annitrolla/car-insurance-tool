@@ -12,7 +12,7 @@ def video_metadata(filename):
     return d
 
 
-results_file = 'loxodon_metadata_results.csv'
+results_file = 'metadata_results.csv'
 video_dir = 'Movies'
 files = glob.glob("%s/*" % video_dir)
     
