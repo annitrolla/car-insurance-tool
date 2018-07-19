@@ -44,7 +44,7 @@ To run the tool, follow these steps:
 Inspiration for image processing is taken from these tutorials:
 
 * http://www.pyimagesearch.com/2014/04/21/building-pokedex-python-finding-game-boy-screen-step-4-6/
-  * http://www.pyimagesearch.com/2014/05/05/building-pokedex-python-opencv-perspective-warping-step-5-6/ 
+* http://www.pyimagesearch.com/2014/05/05/building-pokedex-python-opencv-perspective-warping-step-5-6/ 
 
 ## 3. Discussion on the results
 ### 3.1. License plate detection
