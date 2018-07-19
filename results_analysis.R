@@ -1,6 +1,11 @@
 setwd("/home/irene/Repos/car-insurance-tool/")
 
 data <- read.table("loxodon_results.csv", sep=",", header=T)
+data <- read.table("loxodon_results_image_processing.csv", sep=",", header=T)
+data <- read.table("loxodon_results_image_processing2.csv", sep=",", header=T)
+data <- read.table("loxodon_results_image_processing3.csv", sep=",", header=T)
+data <- read.table("loxodon_results_image_processing5.csv", sep=",", header=T)
+
 
 head(data)
 nrow(data)
@@ -16,6 +21,9 @@ library(plyr)
 
 ddply(data_not_na, .(video_file), function(DF) DF[DF$confidence == max(DF$confidence),]) # all of the found plate numbers (having highest confidence) that have 6 symbols, seem correct
 
+ddply(subset(data_not_na, exists_in_rdw=="Exists"), .(video_file), function(DF) DF[DF$confidence == max(DF$confidence),]) # all of the found plate numbers (having highest confidence) that have 6 symbols, seem correct
+
+subset(data_not_na, video_file=="WhatsApp Video 2017-08-04 at 08.32.09")
 # However, plate KV264G (WhatsApp Video 2017-08-04 at 11.04.25) seems correct from video, but not found in RDW
 
 missing <- c("20170806_125958", "WhatsApp Video 2017-08-04 at 07.21.36", "WhatsApp Video 2017-08-04 at 08.31.43", "WhatsApp Video 2017-08-04 at 08.32.09", "WhatsApp Video 2017-08-04 at 08.32.59")
