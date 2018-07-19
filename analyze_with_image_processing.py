@@ -128,7 +128,7 @@ def process_rect(screenCnt):
 
 rdw_data_dict = {}
 
-results_file = 'loxodon_results_image_processing5.csv'
+results_file = 'results_image_processing5.csv'
 video_dir = 'Movies2'
 image_dir = 'analyze_images'
 if not os.path.exists(image_dir):
