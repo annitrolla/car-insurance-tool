@@ -19,8 +19,8 @@ The following Python packages should be installed:
 To run the tool, follow these steps:
 1. Navigate to the folder: **carInsuranceUI**
 2. Only before the first usage, run the commands:
-  1. ```python manage.py makemigrations```
-  2. ```python manage.py migrate```
+   1. ```python manage.py makemigrations```
+   2. ```python manage.py migrate```
 3. Run the command: ```python manage.py runserver```
 4. Navigate to: **localhost:8000** in your browser. 
 (Note: 8000 is the default port. To use a different port, use the following command to run django: python manage.py runserver 0.0.0.0:*<your_port>*)
@@ -36,8 +36,8 @@ To run the tool, follow these steps:
 1. Saves the file
 2. Extracts frames in case of a video file
 3. Loops over the frames, in attempt to detect license plates on:
-  1. the original frame
-  2. the preprocessed frame, where the licence plate is cropped from the image and brought into perspective (if the license plate was tilted in the original image, it becomes straight)
+   1. the original frame
+   2. the preprocessed frame, where the licence plate is cropped from the image and brought into perspective (if the license plate was tilted in the original image, it becomes straight)
   Stops looping if results are found with sufficient confidence.
 4. For each found result, the CaLPReT tool makes a request to the RDW to check if this plate number exists. In case it is, it  adds additional information about the car (color, brand) when possible.
 
