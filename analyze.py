@@ -51,7 +51,7 @@ def request_rdw(car_data):
 
 rdw_data_dict = {}
 
-results_file = 'loxodon_results.csv'
+results_file = 'results.csv'
 video_dir = 'Movies'
 image_dir = 'analyze_images'
 if not os.path.exists(image_dir):
