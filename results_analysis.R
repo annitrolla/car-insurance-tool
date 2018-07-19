@@ -1,10 +1,10 @@
-setwd("/home/irene/Repos/car-insurance-tool/")
+setwd("car-insurance-tool/")
 
-data <- read.table("loxodon_results.csv", sep=",", header=T)
-data <- read.table("loxodon_results_image_processing.csv", sep=",", header=T)
-data <- read.table("loxodon_results_image_processing2.csv", sep=",", header=T)
-data <- read.table("loxodon_results_image_processing3.csv", sep=",", header=T)
-data <- read.table("loxodon_results_image_processing5.csv", sep=",", header=T)
+data <- read.table("results.csv", sep=",", header=T)
+data <- read.table("results_image_processing.csv", sep=",", header=T)
+data <- read.table("results_image_processing2.csv", sep=",", header=T)
+data <- read.table("results_image_processing3.csv", sep=",", header=T)
+data <- read.table("results_image_processing5.csv", sep=",", header=T)
 
 
 head(data)
