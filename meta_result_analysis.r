@@ -1,10 +1,10 @@
-setwd("Projects/Loxodon/car-insurance-tool")
+setwd("car-insurance-tool")
 library(data.table)
 library(tidyverse)
 library(lubridate)
 
 
-dt <- fread("loxodon_metadata_results.csv")
+dt <- fread("metadata_results.csv")
 dt <- mutate(dt, edited = as.factor(ifelse(video_file == "Edited video", 1, 0))) %>%
   mutate(FileSize = as.numeric(tstrsplit(`File Size`, split = ' ')[[1]])) 
 dt <- mutate(dt, TrackDuration = ifelse(tstrsplit(`Track Duration`, split = ' ')[[2]]=='s',
